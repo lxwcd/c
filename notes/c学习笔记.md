@@ -369,6 +369,79 @@ Sum: 60
 - **数学计算**：如`sum`函数。
 - **日志记录**：记录可变数量的日志信息。
 
+# sprintf
+`sprintf` 用于将格式化的数据写入字符串。与 `snprintf` 不同，`sprintf` 不会检查目标缓冲区的大小，因此不会自动截断字符串或添加空字符（`\0`）。这使得 `sprintf` 在使用时需要特别小心，以避免缓冲区溢出的问题。
+
+```c
+int sprintf(char *str, const char *format, ...);
+```
+
+- **`str`**：目标字符串，`sprintf` 会将格式化后的数据写入这个字符串。
+- **`format`**：格式化字符串，描述如何格式化后续参数。
+- **`...`**：可变参数列表，根据格式化字符串的要求提供相应的参数。
+
+`sprintf` 的返回值是写入目标字符串的字符数（不包括末尾的空字符 `\0`）。如果发生错误，返回值为负数。
+
+## 示例 1：基本用法
+
+```c
+#include <stdio.h>
+
+int main() {
+    char buffer[100];
+    int num = 42;
+    float pi = 3.14159;
+
+    int count = sprintf(buffer, "Number: %d, Pi: %.2f", num, pi);
+
+    printf("Formatted string: %s\n", buffer);
+    printf("Number of characters written (excluding '\\0'): %d\n", count);
+
+    return 0;
+}
+```
+
+**输出**:
+```
+Formatted string: Number: 42, Pi: 3.14
+Number of characters written (excluding '\0'): 21
+```
+
+## 示例 2：缓冲区溢出的风险
+
+```c
+#include <stdio.h>
+
+int main() {
+    char buffer[20];
+    int num = 42;
+    float pi = 3.14159;
+
+    int count = sprintf(buffer, "This is a very long string that will exceed the buffer size: %d, %.2f", num, pi);
+
+    printf("Formatted string: %s\n", buffer);
+    printf("Number of characters written (excluding '\\0'): %d\n", count);
+
+    return 0;
+}
+```
+
+**输出**:
+```
+Formatted string: This is a very long string that will exceed the buffer size: 42, 3.14
+Number of characters written (excluding '\0'): 60
+```
+
+## 注意事项
+
+1. **缓冲区溢出**：
+   - `sprintf` 不会检查目标缓冲区的大小，因此如果格式化后的字符串长度超过缓冲区大小，会导致缓冲区溢出。
+   - 缓冲区溢出可能导致程序崩溃、数据损坏甚至安全漏洞。
+
+2. **安全替代品**：
+   - 为了避免缓冲区溢出，建议使用 `snprintf`，它会检查缓冲区大小并自动截断字符串。
+   - `snprintf` 的语法与 `sprintf` 类似，但多了一个参数指定缓冲区大小。
+
 # snprintf
 `snprintf` 是 C 标准库中的一个函数，用于将格式化的数据写入字符串缓冲区，并且可以限制写入的长度，从而避免缓冲区溢出。
 
@@ -1081,3 +1154,75 @@ jump:
 ```
 error: jump bypasses variable initialization
 ```
+
+# strlen
+`strlen` 是 C 标准库中一个非常常用的函数，用于计算字符串的长度。它定义在 `<string.h>` 头文件中。
+
+```c
+size_t strlen(const char *s);
+```
+
+- **`s`**：指向以空字符（`\0`）结尾的字符串的指针。
+- **返回值**：返回字符串的长度，不包括末尾的空字符（`\0`）。
+
+`strlen` 用于计算**以空字符结尾**的字符串的长度。它会从给定的字符串开始，逐个字符地计数，直到遇到空字符（`\0`）为止。
+
+## 示例 1：基本用法
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    const char *str = "Hello, World!";
+    size_t length = strlen(str);
+
+    printf("The length of the string \"%s\" is %zu.\n", str, length);
+
+    return 0;
+}
+```
+
+**输出**:
+```
+The length of the string "Hello, World!" is 13.
+```
+
+## 示例 2：处理空字符串
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    const char *str = "";
+    size_t length = strlen(str);
+
+    printf("The length of the string \"%s\" is %zu.\n", str, length);
+
+    return 0;
+}
+```
+
+**输出**:
+```
+The length of the string "" is 0.
+```
+
+## 注意事项
+
+1. **空字符（`\0`）**：
+   - `strlen` 计算的是从字符串开始到第一个空字符（`\0`）之前的字符数。因此，它不包括末尾的空字符。
+
+2. **字符串必须以空字符结尾**：
+   - 如果传入的字符串没有以空字符结尾，`strlen` 会继续读取内存，直到遇到空字符为止。这可能导致未定义行为，甚至程序崩溃。
+
+3. **返回值类型**：
+   - `strlen` 的返回值类型是 `size_t`，这是一个无符号整数类型，通常用于表示大小。在使用时，确保将其存储在适当类型的变量中。
+
+4. **性能考虑**：
+   - `strlen` 需要逐个字符地遍历字符串，因此其时间复杂度为 O(n)，其中 n 是字符串的长度。对于非常长的字符串，这可能会影响性能。
+
+## 安全性
+
+使用 `strlen` 时，确保传入的字符串是有效的，并且以空字符结尾。如果字符串可能来自不可信的源，建议在使用前进行验证，以避免潜在的安全问题。
